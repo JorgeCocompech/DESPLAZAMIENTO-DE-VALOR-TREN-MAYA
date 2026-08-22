@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desplazamiento de Valor: Tren Maya | Visualización por Jorge Cocompech</title>
+
+    <!-- Leaflet & Open Source CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            
+            --ancla-antes: #f59e0b;       /* Naranja: 2012-2018 */
+            --ancla-durante: #ef4444;     /* Rojo: Tren Maya Expropiación */
+            --ancla-despues: #10b981;     /* Verde: Mercado Privado */
+            --highlight: #38bdf8;
+            --card-bg: #1e293b;
+
+            --sig-text: #f8fafc;
+            --sig-muted: #94a3b8;
+            --sig-link: #38bdf8;
+            --sig-border: #334155;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --panel-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #e2e8f0;
+            --card-bg: #f1f5f9;
+            --highlight: #0284c7;
+
+            --sig-text: #0f172a;
+            --sig-muted: #64748b;
+            --sig-link: #0284c7;
+            --sig-border: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Atkinson Hyperlegible', Georgia, serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.75;
+            font-size: 1.05rem;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Navigation Header */
+        nav {
+            position: sticky; top: 0; z-index: 2000;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .nav-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--highlight); letter-spacing: 0.05em; }
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
+
+        .btn {
+            font-size: 0.75rem; font-weight: 700;
+            padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: var(--panel-bg); color: var(--text-main); cursor: pointer; text-decoration: none;
+            transition: 0.2s;
+        }
+        .btn:hover { border-color: var(--highlight); color: var(--highlight); }
+
+        /* Article Wrapper */
+        article { max-width: 840px; margin: 0 auto; padding: 40px 20px; }
+
+        .kicker { font-family: 'Manrope', sans-serif; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--highlight); margin-bottom: 8px; letter-spacing: 0.1em; }
+        h1 { font-family: 'Manrope', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1.25; margin-bottom: 16px; letter-spacing: -0.02em; }
+
+        /* Source Link Banner */
+        .source-banner {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--highlight);
+            border-radius: 6px;
+            padding: 16px;
+            margin: 24px 0 32px 0;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .source-banner a { color: var(--highlight); text-decoration: none; font-weight: 700; }
+        .source-banner a:hover { text-decoration: underline; }
+
+        p { margin-bottom: 20px; text-align: justify; }
+
+        h2 { font-family: 'Manrope', sans-serif; font-size: 1.35rem; font-weight: 800; margin: 36px 0 16px 0; border-left: 3px solid var(--highlight); padding-left: 10px; }
+
+        /* Full Methodological Table Styling */
+        .table-container {
+            overflow-x: auto; margin: 30px 0;
+            border: 1px solid var(--border-color); border-radius: 8px;
+            background: var(--panel-bg);
+        }
+
+        table {
+            width: 100%; border-collapse: collapse;
+            font-family: 'Manrope', sans-serif; font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--bg-dark); color: var(--text-main);
+            text-align: left; padding: 10px 12px;
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 800;
+        }
+
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        tr:last-child td { border-bottom: none; }
+
+        .tag {
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            padding: 2px 6px; border-radius: 3px; display: inline-block;
+        }
+        .tag-antes { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .tag-durante { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .tag-despues { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        /* Embedded Map Section */
+        #observatorio-section {
+            width: 100vw; position: relative; left: 50%; right: 50%;
+            margin-left: -50vw; margin-right: -50vw; height: 720px;
+            margin-top: 40px; margin-bottom: 40px;
+            border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+            display: flex;
+        }
+
+        #map-wrapper { display: flex; width: 100%; height: 100%; }
+        #dashboard { width: 380px; height: 100%; z-index: 1000; background: var(--panel-bg); display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border-color); }
+        .dashboard-header { padding: 16px; border-bottom: 1px solid var(--border-color); }
+        
+        .gap-container { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-top: 10px; }
+        .gap-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; }
+        .gap-box { padding: 6px; border-radius: 4px; border: 1px solid var(--border-color); }
+        .gap-box.ayer { background: rgba(239, 68, 68, 0.1); }
+        .gap-box.manana { background: rgba(16, 185, 129, 0.1); }
+        .gap-val { font-size: 1rem; font-weight: 800; font-family: 'Manrope', sans-serif; }
+        .gap-box.ayer .gap-val { color: var(--ancla-durante); }
+        .gap-box.manana .gap-val { color: var(--ancla-despues); }
+        .gap-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .timeline-controls { display: flex; gap: 4px; margin-top: 10px; }
+        .t-btn { flex: 1; padding: 6px; font-size: 0.65rem; font-family: 'Manrope', sans-serif; font-weight: 800; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-dark); color: var(--text-muted); cursor: pointer; text-align: center; }
+        .t-btn.active { border-color: var(--highlight); color: var(--highlight); background: rgba(56, 189, 248, 0.1); }
+
+        #stats-container { flex-grow: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .node-card { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; transition: 0.2s; font-family: 'Manrope', sans-serif;}
+        .node-card:hover { border-color: var(--highlight); }
+
+        #map { flex-grow: 1; height: 100%; background: var(--bg-dark); }
+
+        /* Methodological Data Grid */
+        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; font-family: 'Manrope', sans-serif; }
+        .grid-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; font-size: 0.85rem; }
+        .grid-card h3 { font-size: 0.95rem; font-weight: 800; color: var(--highlight); margin-bottom: 6px; }
+
+        /* Footer & Signature */
+        footer { border-top: 1px solid var(--border-color); background: var(--panel-bg); padding: 30px 20px; margin-top: 60px; }
+        .footer-content { max-width: 840px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); font-family: 'Manrope', sans-serif; }
+
+        .jc-signature-bar { display: flex; align-items: center; gap: 12px; border-left: 2px solid var(--sig-border); padding-left: 12px; }
+        .jc-sig-avatar { width: 40px; height: 40px; min-width: 40px; min-height: 40px; aspect-ratio: 1/1; border-radius: 50%; border: 1.5px solid var(--sig-link); object-fit: cover; }
+        .jc-sig-info { display: flex; flex-direction: column; line-height: 1.25; }
+        .jc-sig-name { font-size: 0.8rem; font-weight: 800; color: var(--sig-text); }
+        .jc-sig-title { font-size: 0.65rem; color: var(--sig-muted); }
+        .jc-sig-links { display: flex; gap: 6px; margin-top: 2px; font-size: 0.65rem; }
+        .jc-sig-link { color: var(--sig-link); text-decoration: none; font-weight: 700; }
+
+        @media (max-width: 768px) {
+            #observatorio-section { height: auto; flex-direction: column; }
+            #map-wrapper { flex-direction: column; height: 600px; }
+            #dashboard { width: 100%; height: 260px; }
+            .grid-cards { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; gap: 15px; text-align: center; }
+            .jc-signature-bar { border-left: none; border-top: 1px solid var(--sig-border); padding-left: 0; padding-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-title">Desplazamiento de Valor</div>
+        <div class="nav-actions">
+            <button class="btn" onclick="toggleTheme()">🌗 Tema</button>
+        </div>
+    </nav>
+
+    <article>
+        <div class="kicker">Cartografía & Análisis de Datos</div>
+        <h1>El mapa de la aritmética no conciliada en el Tren Maya</h1>
+
+        <!-- Substack Original Source Reference -->
+        <div class="source-banner">
+            📄 <strong>Inspiración y Fuente Original:</strong> Esta visualización e investigación geoespacial toma como punto de partida el ensayo <a href="https://substack.com/home/post/p-211655561" target="_blank">"El metro cuadrado que el Tren Maya compra a 12 pesos y el que se vende a 2,000"</a> escrito por <strong>David Aguilar Juárez</strong> en <em>Crónicas del Camarón Vaquero</em>. Nos fascinó la premisa y decidimos darle forma de observatorio interactivo.
+        </div>
+
+        <p>
+            Existe una tensión inherente entre la indemnización por expropiación que decreta el Estado y la plusvalía que oferta el mercado inmobiliario privado alrededor de una misma infraestructura. Mientras el Instituto de Administración y Avalúos de Bienes Nacionales (Indaabin) fija el precio de la tierra basándose estrictamente en su <strong>uso de suelo preexistente</strong> (agostadero, monte o uso común), el desarrollador comercial cotiza la <strong>expectativa de conectividad futura</strong>.
+        </p>
+
+        <!-- COMPREHENSIVE METHODOLOGICAL COMPARISON TABLE -->
+        <h2>📊 Comparativa de Costes por Metro Cuadrado: Expropiación vs. Mercado</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Etapa Temporal</th>
+                        <th>Ubicación / Ejido</th>
+                        <th>Estado</th>
+                        <th>Mecanismo / Fuente</th>
+                        <th>Precio/m² Nominal</th>
+                        <th>Precio/m² Ajustado (2026)</th>
+                        <th>Múltiplo vs Base</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tag tag-antes">Antes (2012–2018)</span></td>
+                        <td><strong>Calkiní</strong></td>
+                        <td>Campeche</td>
+                        <td>Expropiación (DOF 26/05/2015)</td>
+                        <td>~$8.50</td>
+                        <td><strong>$13.08</strong></td>
+                        <td>1.04x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-antes">Antes (2012–2018)</span></td>
+                        <td><strong>Laguna Om (Histórico)</strong></td>
+                        <td>Q. Roo</td>
+                        <td>Expropiación (DOF 18/12/2015)</td>
+                        <td>~$12.74</td>
+                        <td><strong>$19.60</strong></td>
+                        <td>1.56x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
+                        <td><strong>Tomás Aznar (Calakmul)</strong></td>
+                        <td>Campeche</td>
+                        <td>Expropiación (Indaabin 08/2026)</td>
+                        <td>$12.53</td>
+                        <td><strong>$12.53</strong></td>
+                        <td>1.0x (Piso)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
+                        <td><strong>San Antonio Poxilá (Umán)</strong></td>
+                        <td>Yucatán</td>
+                        <td>Expropiación (Indaabin 2024-2026)</td>
+                        <td>$52.89</td>
+                        <td><strong>$52.89</strong></td>
+                        <td>4.22x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
+                        <td><strong>Ejido Bacalar</strong></td>
+                        <td>Q. Roo</td>
+                        <td>Expropiación (Indaabin 2024-2026)</td>
+                        <td>$82.86</td>
+                        <td><strong>$82.86</strong></td>
+                        <td>6.61x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
+                        <td><strong>Juan Sarabia</strong></td>
+                        <td>Q. Roo</td>
+                        <td>Expropiación (Indaabin 07/2026)</td>
+                        <td>$157.32</td>
+                        <td><strong>$157.32</strong></td>
+                        <td>12.55x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-despues">Después (Mercado)</span></td>
+                        <td><strong>Umán (Desarrollador)</strong></td>
+                        <td>Yucatán</td>
+                        <td>Oferta Comercial Privada</td>
+                        <td>$180.00</td>
+                        <td><strong>$180.00</strong></td>
+                        <td>14.36x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-despues">Después (Mercado)</span></td>
+                        <td><strong>Teya / Mérida</strong></td>
+                        <td>Yucatán</td>
+                        <td>Oferta Comercial Privada</td>
+                        <td>$2,000.00</td>
+                        <td><strong>$2,000.00</strong></td>
+                        <td>159.62x (Techo)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <!-- OBSERVATORIO MAPA (EMBEDDED FULL-WIDTH) -->
+    <section id="observatorio-section">
+        <div id="map-wrapper">
+            <div id="dashboard">
+                <div class="dashboard-header">
+                    <div class="kicker">Observatorio de Suelo</div>
+                    <div style="font-family:'Manrope', sans-serif; font-size:1rem; font-weight:800;">Línea de Tiempo de Suelo</div>
+                    
+                    <div class="gap-container">
+                        <div class="gap-comparison">
+                            <div class="gap-box ayer">
+                                <div class="gap-val">$12.53</div>
+                                <div class="gap-label">Piso Indaabin</div>
+                            </div>
+                            <div class="gap-box manana">
+                                <div class="gap-val">$2,000</div>
+                                <div class="gap-label">Techo Mercado</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-controls">
+                        <button class="t-btn active" onclick="filterTimeline('todos', this)">TODOS</button>
+                        <button class="t-btn" onclick="filterTimeline('antes', this)">ANTES (2012-18)</button>
+                        <button class="t-btn" onclick="filterTimeline('durante', this)">DURANTE (TREN)</button>
+                        <button class="t-btn" onclick="filterTimeline('despues', this)">DESPUÉS (MKT)</button>
+                    </div>
+                </div>
+                <div id="stats-container">
+                    <div id="node-list"></div>
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- METHODOLOGICAL DATA SECTION (DOF EXTRACTS) -->
+    <article>
+        <h2>🔎 Rastreabilidad de Datos en el Diario Oficial (DOF)</h2>
+        <p>
+            Para validar el comportamiento del suelo y verificar si la expropiación recurrente era un patrón de similar magnitud en el sexenio previo (2012–2018), se sistematizaron los decretos publicados en el Diario Oficial de la Federación:
+        </p>
+
+        <div class="grid-cards">
+            <div class="grid-card">
+                <h3>1. Antecedentes 2012–2018</h3>
+                <p style="text-align:left; font-size:0.8rem; margin:0;">
+                    Rastreo con el parámetro <code>site:dof.gob.mx "expropia" "ejido" "2012-2018"</code>. Revela un congelamiento normativo: la masa de expropiaciones ejidales para el corredor se decretó de forma masiva a partir de 2023. Ejidos como Laguna Om registraron decretos previos en 2015 a valor agrícola.
+                </p>
+            </div>
+            <div class="grid-card">
+                <h3>2. Dictámenes Indaabin 2024–2026</h3>
+                <p style="text-align:left; font-size:0.8rem; margin:0;">
+                    Rastreo de expedientes oficiales. San Antonio Poxilá (Umán) fijó $52.89/m²; Bacalar (Dictamen 04-24-558) fijó $82.86/m²; mientras que Juan Sarabia (Q. Roo) alcanzó el techo de indemnización estatal con $157.32/m².
+                </p>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <div class="footer-content">
+            <div>
+                <strong>Desplazamiento de Valor y Plusvalía: Tren Maya</strong><br>
+                Basado en <a href="https://cronicasdelcamaronvaquero.substack.com/p/el-metro-cuadrado-que-el-tren-maya">el artículo</a> de David Aguilar Juárez (<em><a href="https://cronicasdelcamaronvaquero.substack.com">Crónicas del Camarón Vaquero</a></em>).<br>
+                Visualización de datos e ingeniería web por Jorge Cocompech.
+            </div>
+
+            <div class="jc-signature-bar">
+                <img src="https://kuroniria.com/mail-avatar.png" alt="Jorge Cocompech" class="jc-sig-avatar" onerror="this.src='https://ui-avatars.com/api/?name=Jorge+Cocompech&background=0D8ABC&color=fff'">
+                <div class="jc-sig-info">
+                    <div class="jc-sig-name">Jorge Cocompech</div>
+                    <div class="jc-sig-title">Data Visualization & Creative Technologist</div>
+                    <div class="jc-sig-links">
+                        <a href="https://jorgecocompech.rocks" target="_blank" class="jc-sig-link">jorgecocompech.rocks</a>
+                        <span>  CDMX</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet & Script -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const zonesData = [
+            // ANTES (2012-2018)
+            { id: "calkini_2015", name: "Ejido Calkiní (2015)", state: "Campeche", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 13.08, multiplier: "1.04x", polygon: [[20.350, -90.060], [20.370, -90.060], [20.370, -90.040], [20.350, -90.040]] },
+            { id: "laguna_om_2015", name: "Laguna Om (Decreto 2015)", state: "Quintana Roo", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 19.60, multiplier: "1.56x", polygon: [[18.480, -89.110], [18.500, -89.110], [18.500, -89.090], [18.480, -89.090]] },
+            
+            // DURANTE (TREN MAYA 2024-2026)
+            { id: "calakmul_piso", name: "Tomás Aznar Barbachano", state: "Campeche", stage: "durante", mechanism: "Indaabin (DOF 12/08/2026)", price_m2: 12.53, multiplier: "1.0x (Piso)", polygon: [[18.505, -89.295], [18.528, -89.295], [18.528, -89.271], [18.505, -89.271]] },
+            { id: "poxila_uman", name: "San Antonio Poxilá (Umán)", state: "Yucatán", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 52.89, multiplier: "4.22x", polygon: [[20.865, -89.758], [20.885, -89.758], [20.885, -89.732], [20.865, -89.732]] },
+            { id: "bacalar", name: "Ejido Bacalar", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 82.86, multiplier: "6.61x", polygon: [[18.668, -88.405], [18.688, -88.405], [18.688, -88.379], [18.668, -88.379]] },
+            { id: "juan_sarabia", name: "Ejido Juan Sarabia", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 22/07/2026)", price_m2: 157.32, multiplier: "12.55x", polygon: [[18.488, -88.498], [18.508, -88.498], [18.508, -88.468], [18.488, -88.468]] },
+            
+            // DESPUÉS (MERCADO COMERCIAL)
+            { id: "uman_privado", name: "Umán (Desarrollador Privado)", state: "Yucatán", stage: "despues", mechanism: "Mercado Comercial Privado", price_m2: 180.00, multiplier: "14.36x", polygon: [[20.880, -89.730], [20.898, -89.730], [20.898, -89.715], [20.880, -89.715]] },
+            { id: "teya_merida", name: "Teya / Mérida (Acceso)", state: "Yucatán", stage: "despues", mechanism: "Mercado Comercial Privado", price_m2: 2000.00, multiplier: "159.62x", polygon: [[20.915, -89.570], [20.935, -89.570], [20.935, -89.545], [20.915, -89.545]] }
+        ];
+
+        const map = L.map('map', { center: [19.5000, -88.8000], zoom: 7, zoomControl: false });
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO' });
+        const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO' });
+        darkTiles.addTo(map);
+
+        const railCoords = [
+            [17.4839, -91.9818], [18.6111, -90.7342], [19.8439, -90.5347], 
+            [20.8750, -89.7450], [20.9250, -89.5583], [20.8960, -88.1962], 
+            [21.1619, -86.8466], [20.2114, -87.4654], [18.6781, -88.3922], 
+            [18.4989, -88.4833], [18.5083, -89.0917], [18.5167, -89.2833], [18.6111, -90.7342]
+        ];
+        L.polyline(railCoords, { color: '#38bdf8', weight: 3, opacity: 0.7, dashArray: '6,6' }).addTo(map);
+
+        const mapLayers = {};
+
+        function renderMapFeatures(filterStage = 'todos') {
+            Object.values(mapLayers).forEach(layer => map.removeLayer(layer));
+
+            zonesData.forEach(zone => {
+                if (filterStage !== 'todos' && zone.stage !== filterStage) return;
+
+                let color = '#ef4444';
+                if (zone.stage === 'antes') color = '#f59e0b';
+                if (zone.stage === 'despues') color = '#10b981';
+
+                const poly = L.polygon(zone.polygon, { color: color, fillColor: color, fillOpacity: 0.5, weight: 2 });
+                poly.bindPopup(`
+                    <div style="padding:8px; font-family:'Manrope', sans-serif;">
+                        <div style="font-size:0.65rem; font-weight:800; color:${color}; text-transform:uppercase;">${zone.mechanism}</div>
+                        <div style="font-size:0.95rem; font-weight:800;">${zone.name}</div>
+                        <div style="font-size:1.1rem; font-weight:800; margin-top:4px;">$${zone.price_m2.toFixed(2)} MXN / m²</div>
+                    </div>
+                `);
+                poly.addTo(map);
+                mapLayers[zone.id] = poly;
+            });
+            renderNodeList(filterStage);
+        }
+
+        function renderNodeList(filterStage = 'todos') {
+            const container = document.getElementById('node-list');
+            container.innerHTML = '';
+            
+            zonesData.forEach(zone => {
+                if (filterStage !== 'todos' && zone.stage !== filterStage) return;
+
+                let color = '#fca5a5';
+                if (zone.stage === 'antes') color = '#fcd34d';
+                if (zone.stage === 'despues') color = '#6ee7b7';
+
+                const card = document.createElement('div');
+                card.className = 'node-card';
+                card.innerHTML = `
+                    <div style="font-size:0.8rem; font-weight:800;">${zone.name}</div>
+                    <div style="font-size:0.75rem; color:${color}; font-weight:700; margin-top:2px;">
+                        $${zone.price_m2.toFixed(2)} / m² (${zone.multiplier})
+                    </div>
+                `;
+                card.onclick = () => {
+                    const layer = mapLayers[zone.id];
+                    if (layer) {
+                        map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 11 });
+                        layer.openPopup();
+                    }
+                };
+                container.appendChild(card);
+            });
+        }
+
+        function filterTimeline(stage, btn) {
+            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMapFeatures(stage);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                map.removeLayer(darkTiles); lightTiles.addTo(map);
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                map.removeLayer(lightTiles); darkTiles.addTo(map);
+            }
+        }
+
+        renderMapFeatures();
+    </script>
+</body>
+</html>
