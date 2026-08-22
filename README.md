@@ -9,10 +9,6 @@ https://substack.com/home/post/p-211655561
 Autor: 
 David Aguilar Juárez
 
-Ir al mapa:
-
-https://jorgecocompech.github.io/DESPLAZAMIENTO-DE-VALOR-TREN-MAYA/mapa01.html
-
 
 Con estos datos:
 
