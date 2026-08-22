@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Desplazaminto de Valor| Tren Maya</title>
+
+    <!-- Leaflet & Open Source CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            
+            /* Anclas de Valor */
+            --ancla-ayer: #ef4444;       /* Rojo: Expropiación Indaabin */
+            --ancla-manana: #10b981;     /* Verde: Mercado Comercial */
+            --rail-color: #38bdf8;       /* Azul: Eje Ferroviario */
+            
+            --card-bg: #0f172a;
+            --input-bg: #334155;
+            --highlight: #38bdf8;
+            
+            /* Signature Theme Variables */
+            --sig-text: #f8fafc;
+            --sig-muted: #94a3b8;
+            --sig-link: #38bdf8;
+            --sig-border: #334155;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --panel-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --card-bg: #f1f5f9;
+            --input-bg: #ffffff;
+            --highlight: #0284c7;
+
+            /* Signature Light Theme */
+            --sig-text: #0f172a;
+            --sig-muted: #64748b;
+            --sig-link: #0284c7;
+            --sig-border: #cbd5e1;
+        }
+        
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Manrope', sans-serif; 
+            background: var(--bg-dark); color: var(--text-main);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
+        }
+
+        #main-wrapper {
+            display: flex; flex-grow: 1; height: calc(100vh - 70px); width: 100%;
+        }
+        
+        /* Dashboard Lateral */
+        #dashboard {
+            width: 420px; height: 100%; z-index: 1000;
+            background: var(--panel-bg);
+            display: flex; flex-direction: column; 
+            flex-shrink: 0; border-right: 1px solid var(--border-color);
+        }
+
+        .dashboard-header {
+            padding: 20px; flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .kicker {
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--highlight); margin-bottom: 4px;
+        }
+
+        h1 { font-size: 1.25rem; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px; line-height: 1.2; }
+        .subtitle { font-family: 'Atkinson Hyperlegible', serif; font-size: 0.85rem; color: var(--text-muted); line-height: 1.3; }
+
+        /* Medidor de Brecha Central */
+        .gap-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 14px; margin-top: 15px;
+        }
+
+        .gap-title {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+
+        .gap-comparison {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center;
+        }
+
+        .gap-box {
+            padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);
+        }
+        .gap-box.ayer { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .gap-box.manana { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+
+        .gap-val { font-size: 1.2rem; font-weight: 800; }
+        .gap-box.ayer .gap-val { color: var(--ancla-ayer); }
+        .gap-box.manana .gap-val { color: var(--ancla-manana); }
+
+        .gap-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+
+        .gap-multiplier {
+            margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-color);
+            text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--highlight);
+        }
+
+        /* Widgets Contenedor */
+        #stats-container {
+            flex-grow: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .search-box {
+            padding: 10px 12px; width: 100%;
+            border: 1px solid var(--border-color); border-radius: 6px;
+            background: var(--input-bg); color: var(--text-main);
+            font-family: inherit; font-size: 0.8rem; outline: none; margin-top: 12px;
+        }
+
+        /* Cards / Items */
+        .node-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .node-card:hover { border-color: var(--highlight); transform: translateY(-1px); }
+        .node-card.active { border-color: var(--highlight); background: rgba(56, 189, 248, 0.05); }
+
+        .node-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+        .node-title { font-size: 0.9rem; font-weight: 800; }
+        .node-tag {
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
+            padding: 2px 6px; border-radius: 3px;
+        }
+        .tag-ayer { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .tag-manana { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+        .node-details {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem;
+            margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);
+        }
+        .node-detail-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
+        .node-detail-val { font-weight: 700; }
+
+        /* Mapa */
+        #map { flex-grow: 1; height: 100%; position: relative; background: var(--bg-dark); }
+
+        .theme-btn {
+            position: absolute; top: 15px; right: 15px; z-index: 1000;
+            background: var(--panel-bg); color: var(--text-main);
+            border: 1px solid var(--border-color); padding: 8px 12px;
+            border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+        }
+
+        /* Popups */
+        .leaflet-popup-content-wrapper {
+            background: var(--panel-bg); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 8px; padding: 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .leaflet-popup-tip { background: var(--panel-bg); }
+        .popup-box { padding: 14px; width: 260px; }
+        .popup-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 2px; }
+        .popup-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; }
+        .popup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--card-bg); padding: 8px; border-radius: 6px; }
+
+        /* FOOTER HORIZONTAL Y RESPONSIVO CON FIRMA COCOMPECH */
+        #footer {
+            height: 70px; background: var(--panel-bg); border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
+            font-size: 0.75rem; color: var(--text-muted); transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-methodology {
+            font-size: 0.75rem; color: var(--text-muted); max-width: 50%;
+        }
+
+        /* Signature HTML Horizontal Component */
+        .jc-signature-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Manrope', sans-serif;
+            border-left: 2px solid var(--sig-border);
+            padding-left: 12px;
+        }
+
+        .jc-sig-avatar {
+            width: 40px;
+            height: 32px;
+            min-width: 40px;
+            min-height: 32px;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        .jc-sig-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.25;
+        }
+
+        .jc-sig-name {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--sig-text);
+            letter-spacing: -0.01em;
+        }
+
+        .jc-sig-title {
+            font-size: 0.68rem;
+            color: var(--sig-muted);
+            font-weight: 600;
+        }
+
+        .jc-sig-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+            font-size: 0.68rem;
+        }
+
+        .jc-sig-link {
+            color: var(--sig-link);
+            text-decoration: none;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+        .jc-sig-link:hover { opacity: 0.8; text-decoration: underline; }
+
+        .jc-sig-sep {
+            color: var(--sig-border);
+            font-size: 0.6rem;
+        }
+
+        @media (max-width: 768px) {
+            #main-wrapper { flex-direction: column; height: calc(100vh - 110px); }
+            #dashboard { width: 100%; height: 45vh; }
+            #map { height: 55vh; }
+            #footer {
+                height: 110px;
+                flex-direction: column;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 15px;
+                text-align: center;
+            }
+            .footer-methodology { max-width: 100%; font-size: 0.7rem; }
+            .jc-signature-bar {
+                border-left: none;
+                border-top: 1px solid var(--sig-border);
+                padding-left: 0;
+                padding-top: 6px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="main-wrapper">
+        <!-- Dashboard Lateral -->
+        <div id="dashboard">
+            <div class="dashboard-header">
+                <div class="kicker">Análisis de Desplazamiento de Valor</div>
+                <h1>Tren Maya</h1>
+                <div class="subtitle">Evidencia del diseño jurídico: Expropiación estatal vs. Captura de plusvalía privada</div>
+
+                <!-- Comparador de Brecha Central -->
+                <div class="gap-container">
+                    <div class="gap-title">Disparidad Extrema Registrada</div>
+                    <div class="gap-comparison">
+                        <div class="gap-box ayer">
+                            <div class="gap-val">$12.53</div>
+                            <div class="gap-label">Piso Expropiación / m²<br>(Calakmul)</div>
+                        </div>
+                        <div class="gap-box manana">
+                            <div class="gap-val">$2,000.00</div>
+                            <div class="gap-label">Techo Mercado / m²<br>(Teya Mérida)</div>
+                        </div>
+                    </div>
+                    <div class="gap-multiplier">
+                        Diferencia de Valor: 159.6x (Mismo eje ferroviario)
+                    </div>
+                </div>
+
+                <input type="text" id="search" class="search-box" placeholder="🔍 Filtrar por ejido, municipio o estado..." oninput="filterData()">
+            </div>
+
+            <div id="stats-container">
+                <div id="node-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div id="map">
+            <button class="theme-btn" onclick="toggleTheme()">🌗 Tema</button>
+        </div>
+    </div>
+
+    <!-- FOOTER CON FIRMA HORIZONTAL COCOMPECH -->
+    <footer id="footer">
+        <div class="footer-methodology">
+            <strong>Metodología:</strong> Comparativa basada en decretos de expropiación Indaabin (DOF 2024-2026) y ofertas comerciales registradas.
+        </div>
+
+        <!-- Firma HTML Jorge Cocompech (Horizontal & Responsiva) -->
+        <div class="jc-signature-bar">
+            <img src="https://kuroniria.com/mail-avatar.png" alt="Jorge Cocompech" class="jc-sig-avatar" onerror="this.src='https://ui-avatars.com/api/?name=Jorge+Cocompech&background=0D8ABC&color=fff'">
+            <div class="jc-sig-info">
+                <div class="jc-sig-name">Jorge Cocompech</div>
+                <div class="jc-sig-title">Data Visualization & Creative Technologist</div>
+                <div class="jc-sig-links">
+                    <a href="https://jorgecocompech.rocks" target="_blank" class="jc-sig-link">jorgecocompech.rocks</a>
+                    <span class="jc-sig-sep"> </span>
+                    <span>CDMX</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. DATASET EXACTO DE ZONAS EVALUADAS
+        const zonesData = [
+            // --- ANCLA ESTATAL (Expropiaciones Indaabin) ---
+            {
+                id: "calakmul_piso",
+                name: "Tomás Aznar Barbachano (Calakmul)",
+                state: "Campeche",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin, DOF 12/08/2026)",
+                price_ha: "$125,300",
+                price_m2: 12.53,
+                multiplier: "1.0x (Piso Base)",
+                coords: [18.5167, -89.2833],
+                polygon: [[18.505, -89.295], [18.528, -89.295], [18.528, -89.271], [18.505, -89.271]],
+                desc: "Valor asignado a uso de suelo agrícola/agostadero previo a la obra pública."
+            },
+            {
+                id: "calakmul_techo",
+                name: "Calakmul (Techo de Valor)",
+                state: "Campeche",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin, DOF 12/08/2026)",
+                price_ha: "$154,317",
+                price_m2: 15.43,
+                multiplier: "1.23x",
+                coords: [18.5220, -89.2600],
+                polygon: [[18.512, -89.268], [18.532, -89.268], [18.532, -89.252], [18.512, -89.252]],
+                desc: "Límite superior fijado en decretos de la región de Calakmul."
+            },
+            {
+                id: "laguna_om",
+                name: "Laguna Om (Othón P. Blanco)",
+                state: "Quintana Roo",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin, DOF 07/2026)",
+                price_ha: "$196,000",
+                price_m2: 19.60,
+                multiplier: "1.56x",
+                coords: [18.5083, -89.0917],
+                polygon: [[18.498, -89.102], [18.518, -89.102], [18.518, -89.081], [18.498, -89.081]],
+                desc: "Indemnización agraria en el tramo selva de Quintana Roo."
+            },
+            {
+                id: "poxila_uman",
+                name: "San Antonio Poxilá (Umán Ejidal)",
+                state: "Yucatán",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin 2024-2026)",
+                price_ha: "$528,900",
+                price_m2: 52.89,
+                multiplier: "4.22x",
+                coords: [20.8750, -89.7450],
+                polygon: [[20.865, -89.758], [20.885, -89.758], [20.885, -89.732], [20.865, -89.732]],
+                desc: "Precio indemnizado por el Estado a los ejidatarios en el municipio de Umán."
+            },
+            {
+                id: "bacalar",
+                name: "Ejido Bacalar",
+                state: "Quintana Roo",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin 2024-2026)",
+                price_ha: "$828,600",
+                price_m2: 82.86,
+                multiplier: "6.61x",
+                coords: [18.6781, -88.3922],
+                polygon: [[18.668, -88.405], [18.688, -88.405], [18.688, -88.379], [18.668, -88.379]],
+                desc: "Indemnización por áreas de amortiguamiento y paso en polo turístico."
+            },
+            {
+                id: "juan_sarabia",
+                name: "Ejido Juan Sarabia (Tramo 6)",
+                state: "Quintana Roo",
+                type: "ayer",
+                mechanism: "Expropiación (Indaabin, DOF 22/07/2026)",
+                price_ha: "$1,573,225",
+                price_m2: 157.32,
+                multiplier: "12.55x",
+                coords: [18.4989, -88.4833],
+                polygon: [[18.488, -88.498], [18.508, -88.498], [18.508, -88.468], [18.488, -88.468]],
+                desc: "Máximo valor expropiatorio estatal fijado para infraestructura de carga/pasajeros."
+            },
+
+            // --- ANCLA DE MERCADO (Promesa Privada) ---
+            {
+                id: "uman_privado",
+                name: "Umán (Desarrollador Privado)",
+                state: "Yucatán",
+                type: "manana",
+                mechanism: "Mercado Comercial (Desarrollador)",
+                price_ha: "$1,800,000",
+                price_m2: 180.00,
+                multiplier: "14.36x (3.4x vs. Ejido Poxilá)",
+                coords: [20.8880, -89.7250],
+                polygon: [[20.880, -89.730], [20.898, -89.730], [20.898, -89.715], [20.880, -89.715]],
+                desc: "Oferta privada de suelo industrial/comercial en el mismo municipio de Umán."
+            },
+            {
+                id: "teya_merida",
+                name: "Teya / Mérida (Acceso Comercial)",
+                state: "Yucatán",
+                type: "manana",
+                mechanism: "Mercado Comercial (Desarrollador)",
+                price_ha: "$20,000,000",
+                price_m2: 2000.00,
+                multiplier: "159.62x vs. Piso Base",
+                coords: [20.9250, -89.5583],
+                polygon: [[20.915, -89.570], [20.935, -89.570], [20.935, -89.545], [20.915, -89.545]],
+                desc: "Techo comercial de plusvalía capturada por privados a la entrada de Mérida."
+            }
+        ];
+
+        // 2. INICIALIZACIÓN DEL MAPA
+        const map = L.map('map', { center: [19.5000, -88.8000], zoom: 7, zoomControl: false });
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO' });
+        const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO' });
+        darkTiles.addTo(map);
+
+        // Trazado Ferroviario Lineal (Eje)
+        const railCoords = [
+            [17.4839, -91.9818], [18.6111, -90.7342], [19.8439, -90.5347], 
+            [20.8750, -89.7450], [20.9250, -89.5583], [20.8960, -88.1962], 
+            [21.1619, -86.8466], [20.2114, -87.4654], [18.6781, -88.3922], 
+            [18.4989, -88.4833], [18.5083, -89.0917], [18.5167, -89.2833], [18.6111, -90.7342]
+        ];
+        L.polyline(railCoords, { color: '#38bdf8', weight: 3, opacity: 0.7, dashArray: '6,6' }).addTo(map);
+
+        const polygonsGroup = L.layerGroup().addTo(map);
+        const mapLayers = {};
+
+        // 3. RENDERIZADO DE POLÍGONOS Y DIBUJO DE ASIMETRÍA
+        zonesData.forEach(zone => {
+            const isAyer = zone.type === 'ayer';
+            const color = isAyer ? '#ef4444' : '#10b981';
+
+            const poly = L.polygon(zone.polygon, {
+                color: color,
+                fillColor: color,
+                fillOpacity: isAyer ? 0.35 : 0.60,
+                weight: 2
+            });
+
+            const popupContent = `
+                <div class="popup-box">
+                    <div style="font-size:0.65rem; font-weight:800; color:${color}; text-transform:uppercase;">${zone.mechanism}</div>
+                    <div class="popup-title">${zone.name}</div>
+                    <div class="popup-sub">${zone.state}</div>
+                    <div class="popup-grid">
+                        <div>
+                            <div style="font-size:0.6rem; color:var(--text-muted);">PRECIO / M²</div>
+                            <div style="font-size:1.1rem; font-weight:800;">$${zone.price_m2.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.6rem; color:var(--text-muted);">DISPERSION</div>
+                            <div style="font-size:0.9rem; font-weight:700; color:var(--highlight);">${zone.multiplier}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:8px; font-family:'Atkinson Hyperlegible';">${zone.desc}</div>
+                </div>
+            `;
+
+            poly.bindPopup(popupContent);
+            polygonsGroup.addLayer(poly);
+            mapLayers[zone.id] = poly;
+        });
+
+        // 4. GENERACIÓN DE TARJETAS EN DASHBOARD LATERAL
+        function renderNodeList(data) {
+            const container = document.getElementById('node-list');
+            container.innerHTML = '';
+
+            data.forEach(zone => {
+                const isAyer = zone.type === 'ayer';
+                const card = document.createElement('div');
+                card.className = 'node-card';
+                card.id = `card-${zone.id}`;
+
+                card.innerHTML = `
+                    <div class="node-header">
+                        <div class="node-title">${zone.name}</div>
+                        <span class="node-tag ${isAyer ? 'tag-ayer' : 'tag-manana'}">${isAyer ? 'Ancla Estatal' : 'Mercado Privado'}</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">${zone.mechanism}</div>
+                    <div class="node-details">
+                        <div>
+                            <div class="node-detail-label">Precio / m²</div>
+                            <div class="node-detail-val" style="color:${isAyer ? '#fca5a5' : '#6ee7b7'};">$${zone.price_m2.toFixed(2)} MXN</div>
+                        </div>
+                        <div>
+                            <div class="node-detail-label">Múltiplo vs Base</div>
+                            <div class="node-detail-val">${zone.multiplier}</div>
+                        </div>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    const layer = mapLayers[zone.id];
+                    map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 12 });
+                    layer.openPopup();
+                };
+
+                container.appendChild(card);
+            });
+        }
+
+        // 5. FILTRADO
+        function filterData() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filtered = zonesData.filter(z => 
+                z.name.toLowerCase().includes(query) || 
+                z.state.toLowerCase().includes(query) ||
+                z.mechanism.toLowerCase().includes(query)
+            );
+            renderNodeList(filtered);
+        }
+
+        // 6. TOGGLE TEMA (Sincroniza Firma y Footer automáticamente)
+        function toggleTheme() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                map.removeLayer(darkTiles); lightTiles.addTo(map);
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                map.removeLayer(lightTiles); darkTiles.addTo(map);
+            }
+        }
+
+        // Render Inicial
+        renderNodeList(zonesData);
+    </script>
+</body>
+</html>
