@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desplazamiento de Valor: Tren Maya | Visualización por Jorge Cocompech</title>
+    <title>Desplazamiento de Valor y Plusvalía: El Caso del Tren Maya | Cartografía por Jorge Cocompech</title>
 
     <!-- Leaflet & Open Source CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -21,7 +21,8 @@
             --ancla-durante: #ef4444;     /* Rojo: Tren Maya Expropiación */
             --ancla-despues: #10b981;     /* Verde: Mercado Privado */
             --highlight: #38bdf8;
-            --card-bg: #1e293b;
+            --card-bg: #0f172a;
+            --input-bg: #0f172a;
 
             --sig-text: #f8fafc;
             --sig-muted: #94a3b8;
@@ -66,27 +67,27 @@
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(8px);
             border-bottom: 1px solid var(--border-color);
-            padding: 12px 24px;
+            padding: 12px 20px;
             display: flex; justify-content: space-between; align-items: center;
             font-family: 'Manrope', sans-serif;
         }
 
         .nav-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--highlight); letter-spacing: 0.05em; }
-        .nav-actions { display: flex; gap: 12px; align-items: center; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
 
         .btn {
             font-size: 0.75rem; font-weight: 700;
-            padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color);
+            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color);
             background: var(--panel-bg); color: var(--text-main); cursor: pointer; text-decoration: none;
             transition: 0.2s;
         }
         .btn:hover { border-color: var(--highlight); color: var(--highlight); }
 
         /* Article Wrapper */
-        article { max-width: 840px; margin: 0 auto; padding: 40px 20px; }
+        article { max-width: 860px; margin: 0 auto; padding: 30px 16px; }
 
         .kicker { font-family: 'Manrope', sans-serif; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--highlight); margin-bottom: 8px; letter-spacing: 0.1em; }
-        h1 { font-family: 'Manrope', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1.25; margin-bottom: 16px; letter-spacing: -0.02em; }
+        h1 { font-family: 'Manrope', sans-serif; font-size: 2.1rem; font-weight: 800; line-height: 1.25; margin-bottom: 16px; letter-spacing: -0.02em; }
 
         /* Source Link Banner */
         .source-banner {
@@ -95,7 +96,7 @@
             border-left: 4px solid var(--highlight);
             border-radius: 6px;
             padding: 16px;
-            margin: 24px 0 32px 0;
+            margin: 20px 0 28px 0;
             font-family: 'Manrope', sans-serif;
             font-size: 0.85rem;
         }
@@ -107,17 +108,50 @@
 
         h2 { font-family: 'Manrope', sans-serif; font-size: 1.35rem; font-weight: 800; margin: 36px 0 16px 0; border-left: 3px solid var(--highlight); padding-left: 10px; }
 
-        /* Full Methodological Table Styling */
+        /* Formula & Calculation Box */
+        .formula-box {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 24px 0;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.88rem;
+        }
+
+        .formula-box h3 {
+            font-size: 0.95rem; font-weight: 800; color: var(--highlight); margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        .formula-code {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--highlight);
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        /* Full Methodological Table Styling - Responsive Scroll Wrapper */
         .table-container {
-            overflow-x: auto; margin: 30px 0;
-            border: 1px solid var(--border-color); border-radius: 8px;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             background: var(--panel-bg);
         }
 
         table {
-            width: 100%; border-collapse: collapse;
-            font-family: 'Manrope', sans-serif; font-size: 0.82rem;
-            min-width: 600px;
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.8rem;
+            min-width: 700px;
         }
 
         th {
@@ -125,9 +159,10 @@
             text-align: left; padding: 10px 12px;
             border-bottom: 2px solid var(--border-color);
             font-weight: 800;
+            white-space: nowrap;
         }
 
-        td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         tr:last-child td { border-bottom: none; }
 
         .tag {
@@ -138,12 +173,12 @@
         .tag-durante { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .tag-despues { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
 
-        /* OBSERVATORIO MAP CONTAINER (RE-STRUCTURED FOR NO OVERLAP) */
+        /* OBSERVATORIO SECTION - FLEX/GRID RESPONSIVO */
         #observatorio-section {
             width: 100%;
             max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 32px auto;
+            padding: 0 16px;
         }
 
         .obs-card {
@@ -151,14 +186,14 @@
             border-radius: 12px;
             overflow: hidden;
             background: var(--panel-bg);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
 
         .obs-grid {
             display: flex;
             flex-direction: row;
-            min-height: 600px;
             width: 100%;
+            min-height: 580px;
         }
 
         #dashboard {
@@ -183,32 +218,59 @@
         .gap-box.manana .gap-val { color: var(--ancla-despues); }
         .gap-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
 
-        .timeline-controls { display: flex; gap: 4px; margin-top: 10px; }
-        .t-btn { flex: 1; padding: 6px; font-size: 0.65rem; font-family: 'Manrope', sans-serif; font-weight: 800; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-dark); color: var(--text-muted); cursor: pointer; text-align: center; }
+        .timeline-controls { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+        .t-btn { flex: 1; min-width: 65px; padding: 6px 4px; font-size: 0.65rem; font-family: 'Manrope', sans-serif; font-weight: 800; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-dark); color: var(--text-muted); cursor: pointer; text-align: center; }
         .t-btn.active { border-color: var(--highlight); color: var(--highlight); background: rgba(56, 189, 248, 0.1); }
 
+        /* WIDGETS Y TARJETAS DE MUNICIPIOS SCROLLEABLE */
         #stats-container {
-            max-height: 380px;
+            flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            max-height: 380px;
         }
-        .node-card { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; transition: 0.2s; font-family: 'Manrope', sans-serif;}
+
+        .search-box {
+            padding: 8px 10px; width: 100%;
+            border: 1px solid var(--border-color); border-radius: 6px;
+            background: var(--input-bg); color: var(--text-main);
+            font-family: inherit; font-size: 0.78rem; outline: none; margin-top: 10px;
+        }
+
+        .node-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Manrope', sans-serif;
+            width: 100%;
+        }
         .node-card:hover { border-color: var(--highlight); }
+        .node-card.active { border-color: var(--highlight); background: rgba(56, 189, 248, 0.08); }
+
+        .node-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+        .node-title { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
+        .node-details { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.72rem; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-color); }
+        .node-detail-label { color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; }
+        .node-detail-val { font-weight: 700; }
 
         #map-container-box {
             flex-grow: 1;
             position: relative;
-            min-height: 450px;
+            min-height: 400px;
             width: 100%;
         }
 
         #map {
             width: 100%;
             height: 100%;
-            min-height: 450px;
+            min-height: 400px;
             background: var(--bg-dark);
             z-index: 1;
         }
@@ -219,7 +281,7 @@
         .grid-card h3 { font-size: 0.95rem; font-weight: 800; color: var(--highlight); margin-bottom: 6px; }
 
         /* Footer & Signature */
-        footer { border-top: 1px solid var(--border-color); background: var(--panel-bg); padding: 30px 20px; margin-top: 60px; }
+        footer { border-top: 1px solid var(--border-color); background: var(--panel-bg); padding: 24px 16px; margin-top: 48px; }
         .footer-content { max-width: 840px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); font-family: 'Manrope', sans-serif; }
 
         .jc-signature-bar { display: flex; align-items: center; gap: 12px; border-left: 2px solid var(--sig-border); padding-left: 12px; }
@@ -230,28 +292,43 @@
         .jc-sig-links { display: flex; gap: 6px; margin-top: 2px; font-size: 0.65rem; }
         .jc-sig-link { color: var(--sig-link); text-decoration: none; font-weight: 700; }
 
-        /* BREAKPOINT PARA EVITAR TRASLAPE */
-        @media (max-width: 850px) {
-            #observatorio-section { padding: 0 10px; }
+        /* REGLAS RESPONSIVAS PARA PANTALLAS MÓVILES Y TABLETS */
+        @media (max-width: 820px) {
+            article { padding: 20px 12px; }
+            h1 { font-size: 1.65rem; }
+            #observatorio-section { padding: 0 8px; margin: 24px 0; }
+            
             .obs-grid {
                 flex-direction: column;
                 min-height: auto;
             }
+
             #dashboard {
                 width: 100%;
+                min-width: 100%;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
             }
+
+            .dashboard-header { padding: 12px; }
+
             #stats-container {
-                max-height: 200px;
+                max-height: 220px;
+                padding: 10px;
             }
+
             #map-container-box {
-                height: 450px;
-                min-height: 450px;
+                height: 380px;
+                min-height: 380px;
             }
+
+            #map {
+                min-height: 380px;
+            }
+
             .grid-cards { grid-template-columns: 1fr; }
-            .footer-content { flex-direction: column; gap: 15px; text-align: center; }
-            .jc-signature-bar { border-left: none; border-top: 1px solid var(--sig-border); padding-left: 0; padding-top: 10px; }
+            .footer-content { flex-direction: column; gap: 16px; text-align: center; }
+            .jc-signature-bar { border-left: none; border-top: 1px solid var(--sig-border); padding-left: 0; padding-top: 12px; }
         }
     </style>
 </head>
@@ -260,25 +337,48 @@
     <nav>
         <div class="nav-title">Desplazamiento de Valor</div>
         <div class="nav-actions">
+            <a href="data/observatorio_tren_maya.geojson" class="btn" download>GeoJSON</a>
             <button class="btn" onclick="toggleTheme()">🌗 Tema</button>
         </div>
     </nav>
 
     <article>
-        <div class="kicker">Cartografía & Análisis de Datos</div>
+        <div class="kicker">Cartografía & Visualización de Datos</div>
         <h1>El mapa de la aritmética no conciliada en el Tren Maya</h1>
 
         <!-- Substack Original Source Reference -->
         <div class="source-banner">
-            📄 <strong>Inspiración y Fuente Original:</strong> Esta visualización e investigación geoespacial toma como punto de partida el ensayo <a href="https://substack.com/home/post/p-211655561" target="_blank">"El metro cuadrado que el Tren Maya compra a 12 pesos y el que se vende a 2,000"</a> escrito por <strong>David Aguilar Juárez</strong> en <em>Crónicas del Camarón Vaquero</em>. Nos fascinó la premisa y decidimos darle forma de observatorio interactivo.
+            📄 <strong>Inspiración y Fuente Original:</strong> Esta herramienta e investigación de datos toma como punto de partida el ensayo <a href="https://substack.com/home/post/p-211655561" target="_blank">"El metro cuadrado que el Tren Maya compra a 12 pesos y el que se vende a 2,000"</a> escrito por <strong>David Aguilar Juárez</strong> en <em>Crónicas del Camarón Vaquero</em>. Nos fascinó la premisa y decidimos construir el mapa interactivo y la memoria de cálculo para explorarlo espacialmente.
         </div>
 
         <p>
             Existe una tensión inherente entre la indemnización por expropiación que decreta el Estado y la plusvalía que oferta el mercado inmobiliario privado alrededor de una misma infraestructura. Mientras el Instituto de Administración y Avalúos de Bienes Nacionales (Indaabin) fija el precio de la tierra basándose estrictamente en su <strong>uso de suelo preexistente</strong> (agostadero, monte o uso común), el desarrollador comercial cotiza la <strong>expectativa de conectividad futura</strong>.
         </p>
 
+        <!-- MEMORIA DE CÁLCULO EXPLICATIVA -->
+        <div class="formula-box">
+            <h3>🧮 Memoria de Cálculo y Origen de la Tabulación</h3>
+            <p style="font-size:0.85rem; margin-bottom:10px;">
+                Para transparentar el origen exacto de cada cifra y evitar estimaciones arbitrarias, los precios por metro cuadrado (<code>$/m²</code>) provienen de la conversión directa de los expedientes de indemnización decretados por el Indaabin en el Diario Oficial de la Federación (DOF), dividiendo el monto global dictaminado entre la superficie oficial expropiada (1 hectárea = 10,000 m²):
+            </p>
+            <div class="formula-code">
+                Precio por m² (MXN) = Monto Total de Indemnización Dictaminado / Superficie Expropiada (m²)
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0;">
+                • <strong>Tomás Aznar Barbachano (Calakmul):</strong> $125,300.00 MXN / 10,000 m² = <strong>$12.53 MXN/m²</strong> (Piso Base)<br>
+                • <strong>Laguna Om (Decreto Tren Maya 2026):</strong> $196,000.00 MXN / 10,000 m² = <strong>$19.60 MXN/m²</strong><br>
+                • <strong>San Antonio Poxilá (Umán Ejidal):</strong> $3,768,565.67 MXN / 71,250.19 m² = <strong>$52.89 MXN/m²</strong><br>
+                • <strong>Ejido Bacalar:</strong> $2,870,173.18 MXN / 34,638.00 m² = <strong>$82.86 MXN/m²</strong><br>
+                • <strong>Ejido Juan Sarabia (Tramo 6):</strong> $1,573,225.00 MXN / 10,000 m² = <strong>$157.32 MXN/m²</strong>
+            </p>
+        </div>
+
         <!-- COMPREHENSIVE METHODOLOGICAL COMPARISON TABLE -->
-        <h2>📊 Comparativa de Costes por Metro Cuadrado: Expropiación vs. Mercado</h2>
+        <h2>📊 Tabulación por Horizontes Temporales y Mecanismos de Suelo</h2>
+        <p>
+            La matriz clasifica el valor del suelo en tres etapas metodológicas que conviven en el mismo corredor ferroviario:
+        </p>
+        
         <div class="table-container">
             <table>
                 <thead>
@@ -286,9 +386,10 @@
                         <th>Etapa Temporal</th>
                         <th>Ubicación / Ejido</th>
                         <th>Estado</th>
-                        <th>Mecanismo / Fuente</th>
-                        <th>Precio/m² Nominal</th>
-                        <th>Precio/m² Ajustado (2026)</th>
+                        <th>Expediente / Fuente DOF</th>
+                        <th>Superficie Evaluada</th>
+                        <th>Monto Dictaminado</th>
+                        <th>Precio / m²</th>
                         <th>Múltiplo vs Base</th>
                     </tr>
                 </thead>
@@ -297,35 +398,49 @@
                         <td><span class="tag tag-antes">Antes (2012–2018)</span></td>
                         <td><strong>Calkiní</strong></td>
                         <td>Campeche</td>
-                        <td>Expropiación (DOF 26/05/2015)</td>
-                        <td>~$8.50</td>
-                        <td><strong>$13.08</strong></td>
-                        <td>1.04x</td>
+                        <td>Decreto DOF 26/05/2015</td>
+                        <td>46-10-68 ha</td>
+                        <td>Tabulador Agrario 2015</td>
+                        <td><strong>Base Previa</strong></td>
+                        <td>N/D</td>
                     </tr>
                     <tr>
                         <td><span class="tag tag-antes">Antes (2012–2018)</span></td>
-                        <td><strong>Laguna Om (Histórico)</strong></td>
+                        <td><strong>Laguna Om (Previo)</strong></td>
                         <td>Q. Roo</td>
-                        <td>Expropiación (DOF 18/12/2015)</td>
-                        <td>~$12.74</td>
-                        <td><strong>$19.60</strong></td>
-                        <td>1.56x</td>
+                        <td>Decreto DOF 18/12/2015</td>
+                        <td>33-42-58 ha</td>
+                        <td>Tabulador Agrario 2015</td>
+                        <td><strong>Base Previa</strong></td>
+                        <td>N/D</td>
                     </tr>
                     <tr>
                         <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
                         <td><strong>Tomás Aznar (Calakmul)</strong></td>
                         <td>Campeche</td>
-                        <td>Expropiación (Indaabin 08/2026)</td>
-                        <td>$12.53</td>
+                        <td>Indaabin (DOF 12/08/2026)</td>
+                        <td>10,000 m² (1 ha)</td>
+                        <td>$125,300.00 MXN</td>
                         <td><strong>$12.53</strong></td>
                         <td>1.0x (Piso)</td>
                     </tr>
                     <tr>
                         <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
+                        <td><strong>Laguna Om (Tren Maya)</strong></td>
+                        <td>Q. Roo</td>
+                        <td>Indaabin (DOF 07/2026)</td>
+                        <td>10,000 m² (1 ha)</td>
+                        <td>$196,000.00 MXN</td>
+                        <td><strong>$19.60</strong></td>
+                        <td>1.56x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
                         <td><strong>San Antonio Poxilá (Umán)</strong></td>
                         <td>Yucatán</td>
-                        <td>Expropiación (Indaabin 2024-2026)</td>
-                        <td>$52.89</td>
+                        <td>Indaabin (DOF 2024-2026)</td>
+                        <td>71,250.19 m² (07.12 ha)</td>
+                        <td>$3,768,565.67 MXN</td>
                         <td><strong>$52.89</strong></td>
                         <td>4.22x</td>
                     </tr>
@@ -333,8 +448,9 @@
                         <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
                         <td><strong>Ejido Bacalar</strong></td>
                         <td>Q. Roo</td>
-                        <td>Expropiación (Indaabin 2024-2026)</td>
-                        <td>$82.86</td>
+                        <td>Indaabin (Dictamen 04-24-558)</td>
+                        <td>34,638.00 m² (03.46 ha)</td>
+                        <td>$2,870,173.18 MXN</td>
                         <td><strong>$82.86</strong></td>
                         <td>6.61x</td>
                     </tr>
@@ -342,8 +458,9 @@
                         <td><span class="tag tag-durante">Durante (Tren Maya)</span></td>
                         <td><strong>Juan Sarabia</strong></td>
                         <td>Q. Roo</td>
-                        <td>Expropiación (Indaabin 07/2026)</td>
-                        <td>$157.32</td>
+                        <td>Indaabin (DOF 22/07/2026)</td>
+                        <td>10,000 m² (1 ha)</td>
+                        <td>$1,573,225.00 MXN</td>
                         <td><strong>$157.32</strong></td>
                         <td>12.55x</td>
                     </tr>
@@ -352,16 +469,18 @@
                         <td><strong>Umán (Desarrollador)</strong></td>
                         <td>Yucatán</td>
                         <td>Oferta Comercial Privada</td>
-                        <td>$180.00</td>
+                        <td>Loteo Industrial/Comercial</td>
+                        <td>Cotización Mercado</td>
                         <td><strong>$180.00</strong></td>
-                        <td>14.36x</td>
+                        <td>14.36x (3.4x vs Ejido)</td>
                     </tr>
                     <tr>
                         <td><span class="tag tag-despues">Después (Mercado)</span></td>
                         <td><strong>Teya / Mérida</strong></td>
                         <td>Yucatán</td>
-                        <td>Oferta Comercial Privada</td>
-                        <td>$2,000.00</td>
+                        <td>Dictamen 04-23-2080 / Oferta</td>
+                        <td>Corredor Acceso Mérida</td>
+                        <td>Cotización Mercado</td>
                         <td><strong>$2,000.00</strong></td>
                         <td>159.62x (Techo)</td>
                     </tr>
@@ -370,13 +489,13 @@
         </div>
     </article>
 
-    <!-- OBSERVATORIO MAPA (ESTRUCTURA DE CONTENEDOR SIN TRASLAPE) -->
+    <!-- OBSERVATORIO MAPA (ESTRUCTURA MÓVIL OPTIMIZADA) -->
     <section id="observatorio-section">
         <div class="obs-card">
             <div class="obs-grid">
                 <div id="dashboard">
                     <div class="dashboard-header">
-                        <div class="kicker">Datos de Suelo</div>
+                        <div class="kicker">Observatorio de Suelo</div>
                         <div style="font-family:'Manrope', sans-serif; font-size:1rem; font-weight:800;">Línea de Tiempo de Suelo</div>
                         
                         <div class="gap-container">
@@ -398,6 +517,8 @@
                             <button class="t-btn" onclick="filterTimeline('durante', this)">DURANTE (TREN)</button>
                             <button class="t-btn" onclick="filterTimeline('despues', this)">DESPUÉS (MKT)</button>
                         </div>
+
+                        <input type="text" id="search" class="search-box" placeholder="🔍 Filtrar municipio o estado..." oninput="filterSearch()">
                     </div>
                     <div id="stats-container">
                         <div id="node-list"></div>
@@ -461,11 +582,12 @@
     <script>
         const zonesData = [
             // ANTES (2012-2018)
-            { id: "calkini_2015", name: "Ejido Calkiní (2015)", state: "Campeche", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 13.08, multiplier: "1.04x", polygon: [[20.350, -90.060], [20.370, -90.060], [20.370, -90.040], [20.350, -90.040]] },
-            { id: "laguna_om_2015", name: "Laguna Om (Decreto 2015)", state: "Quintana Roo", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 19.60, multiplier: "1.56x", polygon: [[18.480, -89.110], [18.500, -89.110], [18.500, -89.090], [18.480, -89.090]] },
+            { id: "calkini_2015", name: "Ejido Calkiní (2015)", state: "Campeche", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 13.08, multiplier: "Base Previa", polygon: [[20.350, -90.060], [20.370, -90.060], [20.370, -90.040], [20.350, -90.040]] },
+            { id: "laguna_om_2015", name: "Laguna Om (Decreto 2015)", state: "Quintana Roo", stage: "antes", mechanism: "Expropiación Federal (DOF 2015)", price_m2: 19.60, multiplier: "Base Previa", polygon: [[18.480, -89.110], [18.500, -89.110], [18.500, -89.090], [18.480, -89.090]] },
             
             // DURANTE (TREN MAYA 2024-2026)
             { id: "calakmul_piso", name: "Tomás Aznar Barbachano", state: "Campeche", stage: "durante", mechanism: "Indaabin (DOF 12/08/2026)", price_m2: 12.53, multiplier: "1.0x (Piso)", polygon: [[18.505, -89.295], [18.528, -89.295], [18.528, -89.271], [18.505, -89.271]] },
+            { id: "laguna_om_2026", name: "Laguna Om (Tren Maya)", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 07/2026)", price_m2: 19.60, multiplier: "1.56x", polygon: [[18.498, -89.102], [18.518, -89.102], [18.518, -89.081], [18.498, -89.081]] },
             { id: "poxila_uman", name: "San Antonio Poxilá (Umán)", state: "Yucatán", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 52.89, multiplier: "4.22x", polygon: [[20.865, -89.758], [20.885, -89.758], [20.885, -89.732], [20.865, -89.732]] },
             { id: "bacalar", name: "Ejido Bacalar", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 82.86, multiplier: "6.61x", polygon: [[18.668, -88.405], [18.688, -88.405], [18.688, -88.379], [18.668, -88.379]] },
             { id: "juan_sarabia", name: "Ejido Juan Sarabia", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 22/07/2026)", price_m2: 157.32, multiplier: "12.55x", polygon: [[18.488, -88.498], [18.508, -88.498], [18.508, -88.468], [18.488, -88.468]] },
@@ -477,6 +599,8 @@
 
         let map, darkTiles, lightTiles;
         const mapLayers = {};
+        let currentFilter = 'todos';
+        let searchQuery = '';
 
         function initMap() {
             map = L.map('map', { center: [19.5000, -88.8000], zoom: 7, zoomControl: false });
@@ -497,11 +621,16 @@
             renderMapFeatures();
         }
 
-        function renderMapFeatures(filterStage = 'todos') {
+        function renderMapFeatures() {
             Object.values(mapLayers).forEach(layer => map.removeLayer(layer));
 
             zonesData.forEach(zone => {
-                if (filterStage !== 'todos' && zone.stage !== filterStage) return;
+                const matchesStage = currentFilter === 'todos' || zone.stage === currentFilter;
+                const matchesSearch = searchQuery === '' || 
+                    zone.name.toLowerCase().includes(searchQuery) || 
+                    zone.state.toLowerCase().includes(searchQuery);
+
+                if (!matchesStage || !matchesSearch) return;
 
                 let color = '#ef4444';
                 if (zone.stage === 'antes') color = '#f59e0b';
@@ -518,34 +647,56 @@
                 poly.addTo(map);
                 mapLayers[zone.id] = poly;
             });
-            renderNodeList(filterStage);
 
-            setTimeout(() => { map.invalidateSize(); }, 200);
+            renderNodeList();
+            setTimeout(() => { map.invalidateSize(); }, 150);
         }
 
-        function renderNodeList(filterStage = 'todos') {
+        function renderNodeList() {
             const container = document.getElementById('node-list');
             container.innerHTML = '';
             
             zonesData.forEach(zone => {
-                if (filterStage !== 'todos' && zone.stage !== filterStage) return;
+                const matchesStage = currentFilter === 'todos' || zone.stage === currentFilter;
+                const matchesSearch = searchQuery === '' || 
+                    zone.name.toLowerCase().includes(searchQuery) || 
+                    zone.state.toLowerCase().includes(searchQuery);
+
+                if (!matchesStage || !matchesSearch) return;
 
                 let color = '#fca5a5';
                 if (zone.stage === 'antes') color = '#fcd34d';
                 if (zone.stage === 'despues') color = '#6ee7b7';
 
+                let tagClass = 'tag-durante';
+                if (zone.stage === 'antes') tagClass = 'tag-antes';
+                if (zone.stage === 'despues') tagClass = 'tag-despues';
+
                 const card = document.createElement('div');
                 card.className = 'node-card';
                 card.innerHTML = `
-                    <div style="font-size:0.8rem; font-weight:800;">${zone.name}</div>
-                    <div style="font-size:0.75rem; color:${color}; font-weight:700; margin-top:2px;">
-                        $${zone.price_m2.toFixed(2)} / m² (${zone.multiplier})
+                    <div class="node-header">
+                        <div class="node-title">${zone.name}</div>
+                        <span class="tag ${tagClass}">${zone.stage}</span>
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">${zone.state} • ${zone.mechanism}</div>
+                    <div class="node-details">
+                        <div>
+                            <div class="node-detail-label">Precio / m²</div>
+                            <div class="node-detail-val" style="color:${color};">$${zone.price_m2.toFixed(2)} MXN</div>
+                        </div>
+                        <div>
+                            <div class="node-detail-label">Múltiplo Base</div>
+                            <div class="node-detail-val">${zone.multiplier}</div>
+                        </div>
                     </div>
                 `;
                 card.onclick = () => {
+                    document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
                     const layer = mapLayers[zone.id];
                     if (layer) {
-                        map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 11 });
+                        map.fitBounds(layer.getBounds(), { padding: [40, 40], maxZoom: 11 });
                         layer.openPopup();
                     }
                 };
@@ -556,7 +707,13 @@
         function filterTimeline(stage, btn) {
             document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            renderMapFeatures(stage);
+            currentFilter = stage;
+            renderMapFeatures();
+        }
+
+        function filterSearch() {
+            searchQuery = document.getElementById('search').value.toLowerCase().trim();
+            renderMapFeatures();
         }
 
         function toggleTheme() {
