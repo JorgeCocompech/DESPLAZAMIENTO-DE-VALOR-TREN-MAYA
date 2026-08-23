@@ -46,6 +46,11 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Atkinson Hyperlegible', Georgia, serif;
             background-color: var(--bg-dark);
@@ -58,7 +63,7 @@
         /* Navigation Header */
         nav {
             position: sticky; top: 0; z-index: 2000;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(8px);
             border-bottom: 1px solid var(--border-color);
             padding: 12px 24px;
@@ -112,6 +117,7 @@
         table {
             width: 100%; border-collapse: collapse;
             font-family: 'Manrope', sans-serif; font-size: 0.82rem;
+            min-width: 600px;
         }
 
         th {
@@ -132,17 +138,35 @@
         .tag-durante { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .tag-despues { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
 
-        /* Embedded Map Section */
+        /* EMBEDDED MAP SECTION (CORREGIDO PARA RESPONSIVO Y RENDERING) */
         #observatorio-section {
-            width: 100vw; position: relative; left: 50%; right: 50%;
-            margin-left: -50vw; margin-right: -50vw; height: 720px;
-            margin-top: 40px; margin-bottom: 40px;
-            border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
-            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        #map-wrapper { display: flex; width: 100%; height: 100%; }
-        #dashboard { width: 380px; height: 100%; z-index: 1000; background: var(--panel-bg); display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border-color); }
+        #map-wrapper {
+            display: flex;
+            width: 100%;
+            height: 650px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--panel-bg);
+        }
+
+        #dashboard {
+            width: 360px;
+            height: 100%;
+            z-index: 1000;
+            background: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
+        }
+
         .dashboard-header { padding: 16px; border-bottom: 1px solid var(--border-color); }
         
         .gap-container { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-top: 10px; }
@@ -163,7 +187,13 @@
         .node-card { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; transition: 0.2s; font-family: 'Manrope', sans-serif;}
         .node-card:hover { border-color: var(--highlight); }
 
-        #map { flex-grow: 1; height: 100%; background: var(--bg-dark); }
+        #map {
+            flex-grow: 1;
+            height: 100%;
+            min-height: 100%;
+            width: 100%;
+            background: var(--bg-dark);
+        }
 
         /* Methodological Data Grid */
         .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; font-family: 'Manrope', sans-serif; }
@@ -182,10 +212,30 @@
         .jc-sig-links { display: flex; gap: 6px; margin-top: 2px; font-size: 0.65rem; }
         .jc-sig-link { color: var(--sig-link); text-decoration: none; font-weight: 700; }
 
-        @media (max-width: 768px) {
-            #observatorio-section { height: auto; flex-direction: column; }
-            #map-wrapper { flex-direction: column; height: 600px; }
-            #dashboard { width: 100%; height: 260px; }
+        /* MEDIA QUERIES RESPONSIVAS AJUSTADAS */
+        @media (max-width: 900px) {
+            #map-wrapper {
+                flex-direction: column;
+                height: 750px;
+            }
+            #dashboard {
+                width: 100%;
+                height: 280px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            #map {
+                height: 470px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            article { padding: 20px 15px; }
+            h1 { font-size: 1.7rem; }
+            #observatorio-section { padding: 0 10px; }
+            #map-wrapper { height: 700px; }
+            #dashboard { height: 260px; }
+            #map { height: 440px; }
             .grid-cards { grid-template-columns: 1fr; }
             .footer-content { flex-direction: column; gap: 15px; text-align: center; }
             .jc-signature-bar { border-left: none; border-top: 1px solid var(--sig-border); padding-left: 0; padding-top: 10px; }
@@ -197,6 +247,7 @@
     <nav>
         <div class="nav-title">Desplazamiento de Valor</div>
         <div class="nav-actions">
+            <a href="data/observatorio_tren_maya.geojson" class="btn" download>GeoJSON</a>
             <button class="btn" onclick="toggleTheme()">🌗 Tema</button>
         </div>
     </nav>
@@ -307,7 +358,7 @@
         </div>
     </article>
 
-    <!-- OBSERVATORIO MAPA (EMBEDDED FULL-WIDTH) -->
+    <!-- OBSERVATORIO MAPA (EMBEDDED RESPONSIVE CONTAINER) -->
     <section id="observatorio-section">
         <div id="map-wrapper">
             <div id="dashboard">
@@ -347,7 +398,7 @@
     <article>
         <h2>🔎 Rastreabilidad de Datos en el Diario Oficial (DOF)</h2>
         <p>
-            Para validar el comportamiento del suelo y verificar si la expropiación recurrente era un patrón de similar magnitud en el sexenio previo (2012–2018), se sistematizaron los decretos publicados en el Diario Oficial de la Federación:
+            Para validar el comportamiento del suelo y verificar si la expropiación recurrente era un patrón de similar magnitud en el sexenio previo (2012–2018), se sistematización los decretos publicados en el Diario Oficial de la Federación:
         </p>
 
         <div class="grid-cards">
@@ -370,7 +421,7 @@
         <div class="footer-content">
             <div>
                 <strong>Desplazamiento de Valor y Plusvalía: Tren Maya</strong><br>
-                Basado en <a href="https://cronicasdelcamaronvaquero.substack.com/p/el-metro-cuadrado-que-el-tren-maya">el artículo</a> de David Aguilar Juárez (<em><a href="https://cronicasdelcamaronvaquero.substack.com">Crónicas del Camarón Vaquero</a></em>).<br>
+                Basado en el artículo de David Aguilar Juárez (<em>Crónicas del Camarón Vaquero</em>).<br>
                 Visualización de datos e ingeniería web por Jorge Cocompech.
             </div>
 
@@ -381,7 +432,7 @@
                     <div class="jc-sig-title">Data Visualization & Creative Technologist</div>
                     <div class="jc-sig-links">
                         <a href="https://jorgecocompech.rocks" target="_blank" class="jc-sig-link">jorgecocompech.rocks</a>
-                        <span>  CDMX</span>
+                        <span>• CDMX</span>
                     </div>
                 </div>
             </div>
@@ -446,6 +497,9 @@
                 mapLayers[zone.id] = poly;
             });
             renderNodeList(filterStage);
+
+            // Re-calcular tamaño del mapa en Leaflet para evitar áreas en blanco
+            setTimeout(() => { map.invalidateSize(); }, 200);
         }
 
         function renderNodeList(filterStage = 'todos') {
@@ -493,9 +547,14 @@
                 html.setAttribute('data-theme', 'dark');
                 map.removeLayer(lightTiles); darkTiles.addTo(map);
             }
+            setTimeout(() => { map.invalidateSize(); }, 200);
         }
 
-        renderMapFeatures();
+        // Render e Invalidate Size al cargar
+        window.addEventListener('load', () => {
+            renderMapFeatures();
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        });
     </script>
 </body>
 </html>
