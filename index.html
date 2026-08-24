@@ -108,8 +108,8 @@
 
         h2 { font-family: 'Manrope', sans-serif; font-size: 1.35rem; font-weight: 800; margin: 36px 0 16px 0; border-left: 3px solid var(--highlight); padding-left: 10px; }
 
-        /* Formula & Calculation Box */
-        .formula-box {
+        /* Methodological Context Box */
+        .method-box {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -119,17 +119,24 @@
             font-size: 0.88rem;
         }
 
-        .formula-box h3 {
+        .method-box h3 {
             font-size: 0.95rem; font-weight: 800; color: var(--highlight); margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        .method-box p {
+            font-family: 'Atkinson Hyperlegible', serif;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            text-align: left;
         }
 
         .formula-code {
             background: var(--bg-dark);
             border: 1px solid var(--border-color);
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             font-family: monospace;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--highlight);
             margin: 10px 0;
             text-align: center;
@@ -354,22 +361,21 @@
             Existe una tensión inherente entre la indemnización por expropiación que decreta el Estado y la plusvalía que oferta el mercado inmobiliario privado alrededor de una misma infraestructura. Mientras el Instituto de Administración y Avalúos de Bienes Nacionales (Indaabin) fija el precio de la tierra basándose estrictamente en su <strong>uso de suelo preexistente</strong> (agostadero, monte o uso común), el desarrollador comercial cotiza la <strong>expectativa de conectividad futura</strong>.
         </p>
 
-        <!-- MEMORIA DE CÁLCULO EXPLICATIVA -->
-        <div class="formula-box">
-            <h3>🧮 Memoria de Cálculo y Origen de la Tabulación</h3>
-            <p style="font-size:0.85rem; margin-bottom:10px;">
-                Para transparentar el origen exacto de cada cifra y evitar estimaciones arbitrarias, los precios por metro cuadrado (<code>$/m²</code>) provienen de la conversión directa de los expedientes de indemnización decretados por el Indaabin en el Diario Oficial de la Federación (DOF), dividiendo el monto global dictaminado entre la superficie oficial expropiada (1 hectárea = 10,000 m²):
+        <!-- MEMORIA DE CÁLCULO Y CONTEXTO DE HISTÓRICOS -->
+        <div class="method-box">
+            <h3>📌 Memoria de Cálculo y Contexto Metodológico</h3>
+            <p>
+                Para transparentar la tabulación y asegurar que la comparativa no responda a estimaciones arbitrarias, la muestra se divide en dos categorías operativas:
+            </p>
+            <p>
+                <strong>1. Puntos de Control Históricos (2012–2018):</strong> Registros como <em>Calkiní (2015)</em> y <em>Laguna Om (2015)</em>. No se utilizan para calcular los múltiplos de plusvalía del Tren Maya, sino como un <em>baseline</em> de control previo para demostrar que, antes del proyecto ferroviario, la tierra se indemnizaba de forma homogénea bajo el marco del tabulador agrario tradicional.
+            </p>
+            <p>
+                <strong>2. El Piso Base del Tren Maya (2026):</strong> Fijado en el ejido <em>Tomás Aznar Barbachano</em> ($125,300.00 MXN / 10,000 m² = <strong>$12.53 MXN/m²</strong>). Es la indemnización estatal más baja registrada en el proyecto y constituye el divisor base (<strong>1.0x</strong>) para medir el salto expropiatorio y la plusvalía capturada por privados ($2,000.00 MXN/m² = <strong>159.6x</strong>).
             </p>
             <div class="formula-code">
                 Precio por m² (MXN) = Monto Total de Indemnización Dictaminado / Superficie Expropiada (m²)
             </div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0;">
-                • <strong>Tomás Aznar Barbachano (Calakmul):</strong> $125,300.00 MXN / 10,000 m² = <strong>$12.53 MXN/m²</strong> (Piso Base)<br>
-                • <strong>Laguna Om (Decreto Tren Maya 2026):</strong> $196,000.00 MXN / 10,000 m² = <strong>$19.60 MXN/m²</strong><br>
-                • <strong>San Antonio Poxilá (Umán Ejidal):</strong> $3,768,565.67 MXN / 71,250.19 m² = <strong>$52.89 MXN/m²</strong><br>
-                • <strong>Ejido Bacalar:</strong> $2,870,173.18 MXN / 34,638.00 m² = <strong>$82.86 MXN/m²</strong><br>
-                • <strong>Ejido Juan Sarabia (Tramo 6):</strong> $1,573,225.00 MXN / 10,000 m² = <strong>$157.32 MXN/m²</strong>
-            </p>
         </div>
 
         <!-- COMPREHENSIVE METHODOLOGICAL COMPARISON TABLE -->
@@ -589,7 +595,7 @@
             { id: "laguna_om_2026", name: "Laguna Om (Tren Maya)", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 07/2026)", price_m2: 19.60, multiplier: "1.56x", polygon: [[18.498, -89.102], [18.518, -89.102], [18.518, -89.081], [18.498, -89.081]] },
             { id: "poxila_uman", name: "San Antonio Poxilá (Umán)", state: "Yucatán", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 52.89, multiplier: "4.22x", polygon: [[20.865, -89.758], [20.885, -89.758], [20.885, -89.732], [20.865, -89.732]] },
             { id: "bacalar", name: "Ejido Bacalar", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 2024-2026)", price_m2: 82.86, multiplier: "6.61x", polygon: [[18.668, -88.405], [18.688, -88.405], [18.688, -88.379], [18.668, -88.379]] },
-            { id: "juan_sarabia", name: "Ejido Juan Sarabia", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 22/07/2026)", price_m2: 157.32, multiplier: "12.55x", polygon: [[18.488, -88.498], [18.508, -88.498], [18.508, -88.468], [18.488, -88.468]] },
+            { id: "juan_sarabia", name: "Ejido Juan Sarabia", state: "Quintana Roo", stage: "durante", mechanism: "Indaabin (DOF 22/07/2026)", price_m2: 157.32, multiplier: "12.55x", polygon: [[18.488, -88.483], [18.508, -88.498], [18.508, -88.468], [18.488, -88.468]] },
             
             // DESPUÉS (MERCADO COMERCIAL)
             { id: "uman_privado", name: "Umán (Desarrollador Privado)", state: "Yucatán", stage: "despues", mechanism: "Mercado Comercial Privado", price_m2: 180.00, multiplier: "14.36x", polygon: [[20.880, -89.730], [20.898, -89.730], [20.898, -89.715], [20.880, -89.715]] },
